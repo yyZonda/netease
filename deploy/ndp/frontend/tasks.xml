@@ -1,0 +1,130 @@
+<project>
+
+    <!--clean-->
+    <target name="clean">
+        <echo message="begin clean..."/>
+        <echo message="begin delete lib "/>
+        <delete dir="${basedir}/${web.dir}/lib"/>
+
+        <echo message="begin delete node_modules "/>
+        <delete dir="${basedir}/${web.dir}/node_modules"/>
+
+
+        <echo message="begin delete pub、h、s..."/>
+        <delete dir="${basedir}/${web.dir}/pub"/>
+        <delete dir="${basedir}/${web.dir}/h"/>
+        <delete dir="${basedir}/${web.dir}/s"/>
+
+        <delete dir="${basedir}/${compress.dir}"/>
+        <delete file="${basedir}/tools/publish/names.json"/>
+        <delete file="${basedir}/tools/newPublish/names.json"/>
+
+        <echo message="begin clean html module-xx..."/>
+        <delete includeemptydirs="true">
+            <fileset dir="${basedir}/${web.dir}/src/html" >
+                <include name="**/module-*/**"/>
+            </fileset>
+        </delete>
+
+        <echo message="begin clean res/module-xx、component-xx、res-base..."/>
+        <delete includeemptydirs="true">
+            <fileset dir="${basedir}/${web.dir}/res" >
+                <include name="module-*/**"/>
+                <include name="component-*/**"/>
+                <include name="res-base/**"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <!--npm install-->
+    <target name="npm_install">
+        <echo message="begin npm_install..."/>
+        <exec dir="." executable="npm" failonerror="true">
+            <arg line="install -d"/>
+        </exec>
+    </target>
+
+    <!--build style-->
+    <target name="build_style">
+        <echo message="begin build_style..."/>
+        <exec dir="." executable="gulp" failonerror="true">
+            <arg line="scss"/>
+        </exec>
+    </target>
+
+    <!--bower cache clean if必须是${]才是判断true,false, 否则只要有设定值即可执行-->
+    <target name="bower_cache_clean" if="${is_bower_cache_clean}">
+        <echo message="begin bower_cache_clean ..."/>
+        <exec dir="." executable="bower" failonerror="true">
+            <arg line="cache clean" />
+        </exec>
+    </target>
+
+    <!--npm cache clean if必须是${]才是判断true,false, 否则只要有设定值即可执行-->
+    <target name="npm_cache_clean" if="${is_npm_cache_clean}">
+        <echo message="begin npm_cache_clean ..."/>
+        <exec dir="." executable="npm" failonerror="true">
+            <arg line="cache clean" />
+        </exec>
+    </target>
+
+    <!--bower install-->
+    <target name="bower_install">
+        <echo message="begin bower_install ..."/>
+        <exec dir="." executable="bower" failonerror="true">
+            <arg line="install " />
+        </exec>
+    </target>
+
+    <!--sync module-->
+    <target name="sync_module_item">
+        <echo message="begin sync_module ${html.dir}..."/>
+        <copy todir="${basedir}/${web.dir}/src/html/${html.dir}" overwrite="true" includeEmptyDirs="true">
+            <fileset dir="${basedir}/${web.dir}/lib">
+                <include name="module-*/**" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="sync_module">
+        <parallel failonany="true">
+            <antcall target="sync_module_item">
+                <param name="html.dir" value="newm"/>
+            </antcall>
+        </parallel>
+    </target>
+
+    <!-- study -->
+    <target name="nej_build_study">
+        <echo message="begin mkdir pub、h、s..."/>
+        <mkdir dir="${basedir}/${compress.dir}/h"/>
+        <mkdir dir="${basedir}/${compress.dir}/s"/>
+        <mkdir dir="${basedir}/${compress.dir}/pub"/>
+        <echo message="begin  nej_build_study ${build_type}..."/>
+        <parallel failonany="true">
+            <exec dir="." executable="${study-node}" failonerror="true">
+                <arg line="${nej-build.js} build ${basedir}/tools/publish/release${build_type}.conf -l info"/>
+            </exec>
+            <exec dir="." executable="${study-node}" failonerror="true">
+                <arg line="${nej-build.js} build ${basedir}/tools/newPublish/release${build_type}.conf -l info"/>
+            </exec>            
+            <exec dir="." executable="${study-node}" failonerror="true">
+                <arg line="${nej-build.js} build ${basedir}/tools/publish/mobile_release${build_type}.conf -l info"/>
+            </exec>
+        </parallel>
+    </target>
+
+    <target name="nej_build_test_study" if="${is_test_study}">
+        <antcall target="nej_build_study">
+            <param name="build_type" value="_dev"/>
+        </antcall>
+    </target>
+
+    <target name="nej_build_online_pre_study" if="${is_online_pre_study}">
+        <antcall target="nej_build_study">
+            <param name="build_type" value=""/>
+        </antcall>
+    </target>
+
+
+</project>

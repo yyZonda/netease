@@ -1,0 +1,41 @@
+<project>
+    <!--property 相对与basedir，include、import相对于当前文件位置-->
+    <property file="./deploy/ndp/frontend/build.properties"/>
+    <property name="nej-build.js" value="${basedir}/${nej}"/>
+
+    <import file="./env-judge.xml"/>
+    <import file="./tasks.xml"/>
+
+    <target name="deploy">
+        <echo message="begin real_task......"/>
+
+        <!--根据配置-->
+        <antcall target="bower_cache_clean"/>
+        <antcall target="npm_cache_clean"/>
+
+        <parallel failonany="true">
+            <antcall target="clean"/>
+        </parallel>
+
+        <parallel failonany="true">
+            <antcall target="bower_install"/>
+            <antcall target="npm_install"/>
+        </parallel>
+
+        <parallel failonany="true">
+            <antcall target="sync_module"/>
+            <antcall target="build_style"/>
+        </parallel>
+
+        <echo message="begin copy ${web.dir} to compressed......"/>
+        <copy todir="${compress.dir}" preservelastmodified="true">
+            <fileset dir="${basedir}/${web.dir}"/>
+        </copy>
+
+        <!--只有条件的满足才执行-->
+        <antcall target="nej_build_test_study"/>
+        <antcall target="nej_build_online_pre_study"/>
+
+        <echo message="全部优化后总耗时为："/>
+    </target>
+</project>

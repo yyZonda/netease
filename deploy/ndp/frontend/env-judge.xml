@@ -1,0 +1,61 @@
+<project>
+    <regexp id="regexp_env_test" pattern="^${root_dir}/.*?(_|-)${test_key}"/>
+    <regexp id="regexp_env_dev" pattern="^${root_dir}/.*?(_|-)${dev_key}"/>
+    <regexp id="regexp_env_pre" pattern="^${root_dir}/.*?(_|-)${pre_key}"/>
+    <regexp id="regexp_env_online" pattern="^${root_dir}/.*?(_|-)${online_key}"/>
+
+	<regexp id="regexp_study" pattern="^${root_dir}/.*?${project_key}"/>
+
+    <condition property="is_test">
+        <matches string="${basedir}">
+            <regexp refid="regexp_env_test"/>
+        </matches>
+    </condition>
+
+    <condition property="is_dev">
+        <matches string="${basedir}">
+            <regexp refid="regexp_env_dev"/>
+        </matches>
+    </condition>
+
+    <condition property="is_pre">
+        <matches string="${basedir}">
+            <regexp refid="regexp_env_pre"/>
+        </matches>
+    </condition>
+
+    <condition property="is_online">
+        <matches string="${basedir}">
+            <regexp refid="regexp_env_online"/>
+        </matches>
+    </condition>
+
+    <condition property="is_online_pre">
+        <or>
+            <istrue value="${is_online}"/>
+            <istrue value="${is_pre}"/>
+        </or>
+    </condition>
+
+    <condition property="is_study">
+        <matches string="${basedir}">
+            <regexp refid="regexp_study"/>
+        </matches>
+    </condition>
+
+    <!--study-->
+    <condition property="is_test_study">
+        <and>
+            <istrue value="${is_test}"/>
+            <istrue value="${is_study}"/>
+        </and>
+    </condition>
+
+    <condition property="is_online_pre_study">
+        <and>
+            <istrue value="${is_online_pre}"/>
+            <istrue value="${is_study}"/>
+        </and>
+    </condition>
+
+</project>
